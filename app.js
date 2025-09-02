@@ -66,7 +66,7 @@ app.post('/download', async (req, res) => {
 });
 
 async function download(url, format) {
-    const info = await youtubedl(url, { dumpSingleJson: true });
+    const info = await youtubedl(url, { dumpSingleJson: true, cookies: COOKIES_FILE });
     const channel = info.uploader || 'Unknown_Channel';
     const outputDir = path.join(DOWNLOAD_DIR, channel);
 
