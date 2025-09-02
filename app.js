@@ -13,6 +13,7 @@ const __dirname = path.dirname(__filename);
 
 const DOWNLOAD_DIR = process.env.OUTPUT_DIRECTORY;
 const FFMPEG_DIR = process.env.FFMPEG_DIRECTORY;
+const COOKIES_FILE = process.env.COOKIES_FILE;
 const PORT = process.env.PORT;
 
 const bestFormat = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best";
@@ -75,7 +76,8 @@ async function download(url, format) {
         format: format || bestFormat,
         output: path.join(outputDir, '%(title)s.%(ext)s'),
         ffmpegLocation: FFMPEG_DIR,
-        progress: true
+        progress: true,
+        cookies: COOKIES_FILE
     };
 
     const process = youtubedl.exec(url, options);

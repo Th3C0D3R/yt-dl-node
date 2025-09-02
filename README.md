@@ -45,12 +45,14 @@ Create a `.env` file in the root directory:
 
 ```env
 FFMPEG_DIRECTORY="C:\\Path\\To\\FFmpeg\\bin"
-OUTPUT_DIRECTORY="F:\\Path\\To\\Somewhere"
+OUTPUT_DIRECTORY="C:\\Path\\To\\Somewhere"
+COOKIES_FILE="C:\\Path\\To\\Cookies_FILE"
 PORT=3000
 ```
 
 - **FFMPEG_DIRECTORY** → Path where your `ffmpeg.exe` is located  
 - **OUTPUT_DIRECTORY** → Base folder for downloaded videos (they will be stored by channel name)  
+- **COOKIES_FILE** → Sometimes, Youtube prevents from downloading because they think you are a bot → cookies.txt will help
 - **PORT** → Port of the Server
 
 ---
