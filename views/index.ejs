@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube Downloader</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>YouTube Downloader</h1>
+        <div class="form-group">
+            <input type="text" id="url" placeholder="Enter YouTube URL">
+            <select id="quality">
+                <option value="bestvideo+bestaudio/best">Best</option>
+                <option value="best[height<=720]">720p</option>
+                <option value="best[height<=480]">480p</option>
+            </select>
+            <button id="downloadBtn">Download</button>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <p id="status">Waiting...</p>
+    </div>
+
+    <script src="/script.js"></script>
+</body>
+</html>
