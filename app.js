@@ -16,7 +16,7 @@ const FFMPEG_DIR = process.env.FFMPEG_DIRECTORY;
 const COOKIES_FILE = process.env.COOKIES_FILE;
 const PORT = process.env.PORT;
 
-const bestFormat = "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best";
+const bestFormat = "bv+ba/b";
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
