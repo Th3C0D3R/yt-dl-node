@@ -52,8 +52,11 @@ PORT=3000
 
 - **FFMPEG_DIRECTORY** → Path where your `ffmpeg.exe` is located  
 - **OUTPUT_DIRECTORY** → Base folder for downloaded videos (they will be stored by channel name)  
-- **COOKIES_FILE** → Sometimes, Youtube prevents from downloading because they think you are a bot → cookies.txt will help
+- **COOKIES_FILE** → Sometimes, Youtube prevents from downloading because they think you are a bot → cookies.txt will help **_*1_**
 - **PORT** → Port of the Server
+
+
+**_*1_**) See https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp how to get cookies.txt
 
 ---
 
