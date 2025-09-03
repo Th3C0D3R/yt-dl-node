@@ -86,7 +86,7 @@ async function download(url, format) {
     const process = youtubedl.exec(url, options);
 
     process.stdout.on('data', (chunk) => {
-        console.log(chunk.toString());
+        //console.log(chunk.toString());
         const msg = chunk.toString();
         const match = msg.match(/(\d+\.\d)%/);
         if (match) {
