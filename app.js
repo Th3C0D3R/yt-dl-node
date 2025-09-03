@@ -16,7 +16,7 @@ const FFMPEG_DIR = process.env.FFMPEG_DIRECTORY;
 const COOKIES_FILE = process.env.COOKIES_FILE;
 const PORT = process.env.PORT;
 
-const bestFormat = "bv+ba/b";
+const bestFormat = "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*+ba/b";
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -80,14 +80,22 @@ async function download(url, format) {
         cookies: COOKIES_FILE
     };
 
+    console.log(options.ffmpegLocation);
+    console.log(options.format);
+
     const process = youtubedl.exec(url, options);
 
     process.stdout.on('data', (chunk) => {
+        console.log(chunk.toString());
         const msg = chunk.toString();
         const match = msg.match(/(\d+\.\d)%/);
         if (match) {
             const percent = parseFloat(match[1]);
             sendProgress({ percent, title: info.title });
+        }
+        const mergeMatch = msg.match(/Merging/);
+        if(mergeMatch){
+            sendProgress({ percent: 100, title: `Merging ${info.title} into one file...` });
         }
     });
 

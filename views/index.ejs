@@ -10,10 +10,10 @@
         <div class="form-group">
             <input type="text" id="url" placeholder="Enter YouTube URL">
             <select id="quality">
-                <option value="bv+ba/b">Best (Large Files)</option>
-                <option value="bv*[height<=1080]+ba/b[height<=1080]">1080p</option>
-                <option value="bv*[height<=720]+ba/b[height<=720]">720p</option>
-                <option value="bv*[height<=480]+ba/b[height<=480]">480p</option>
+                <option value="bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*+ba/b">Best (Large Files)</option>
+                <option value="bv*[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080][ext=mp4] / bv*[height<=1080]+ba/b[height<=1080]">1080p</option>
+                <option value="bv*[height<=720][ext=mp4]+ba[ext=m4a]/b[height<=720][ext=mp4] / bv*[height<=720]+ba/b[height<=720]">720p</option>
+                <option value="bv*[height<=480][ext=mp4]+ba[ext=m4a]/b[height<=480][ext=mp4] / bv*[height<=480]+ba/b[height<=480]">480p</option>
             </select>
             <button id="downloadBtn">Download</button>
         </div>
