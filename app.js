@@ -17,6 +17,7 @@ const COOKIES_FILE = process.env.COOKIES_FILE;
 const PORT = process.env.PORT;
 
 const bestFormat = "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*+ba/b";
+var isDownloading = false;
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -26,9 +27,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 let clients = [];
 let queue = getExistingQueue();
+let errored = [];
 
 if (queue.length > 0) {
-
+    for (; queue.length;) {
+        try {
+            const { url, format } = queue.shift();
+            await download(url, format);
+        } catch (error) {
+            console.error(error);
+            errored.push({ url, format });
+        }
+    }
 }
 
 // SSE route for progress updates
@@ -55,6 +65,11 @@ app.get('/', (req, res) => {
 app.post('/download', async (req, res) => {
     const { url, format } = req.body;
     if (!url) return res.status(400).json({ error: 'No URL provided' });
+    if (isDownloading) {
+        queue.push({url,format});
+        res.status(202).json({ response: 'Download already running!\nAdded to queue' });
+        return;
+    }
     try {
         var ret = await download(url, format);
         res.json(ret);
@@ -66,6 +81,7 @@ app.post('/download', async (req, res) => {
 });
 
 async function download(url, format) {
+    isDownloading = true;
     const info = await youtubedl(url, { dumpSingleJson: true, cookies: COOKIES_FILE });
     const channel = info.uploader || 'Unknown_Channel';
     const outputDir = path.join(DOWNLOAD_DIR, channel);
@@ -80,8 +96,8 @@ async function download(url, format) {
         cookies: COOKIES_FILE
     };
 
-    console.log(options.ffmpegLocation);
-    console.log(options.format);
+    //console.log(options.ffmpegLocation);
+    //console.log(options.format);
 
     const process = youtubedl.exec(url, options);
 
@@ -94,17 +110,23 @@ async function download(url, format) {
             sendProgress({ percent, title: info.title });
         }
         const mergeMatch = msg.match(/Merging/);
-        if(mergeMatch){
+        if (mergeMatch) {
             sendProgress({ percent: 100, title: `Merging ${info.title} into one file...` });
         }
     });
 
     process.on('close', () => {
         sendProgress({ percent: 100, title: info.title, done: true });
+        isDownloading = false;
     });
 
     return { success: true }
 
+}
+
+async function getVideoDetails(url){
+    const info = await youtubedl(url, { dumpSingleJson: true, cookies: COOKIES_FILE });
+    const channel = info.uploader || 'Unknown_Channel';
 }
 
 function getExistingQueue() {
