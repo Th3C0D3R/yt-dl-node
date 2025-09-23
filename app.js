@@ -15,9 +15,12 @@ const DOWNLOAD_DIR = process.env.OUTPUT_DIRECTORY;
 const FFMPEG_DIR = process.env.FFMPEG_DIRECTORY;
 const COOKIES_FILE = process.env.COOKIES_FILE;
 const PORT = process.env.PORT;
+const ISDEBUG = process.env.DEBUG === 'true';
 
 const bestFormat = "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*+ba/b";
 var isDownloading = false;
+
+isDownloading = ISDEBUG;
 
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
@@ -26,7 +29,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 let clients = [];
-let queue = getExistingQueue();
+let queue = readQueue();
 let errored = [];
 
 if (queue.length > 0) {
@@ -65,13 +68,15 @@ app.get('/', (req, res) => {
 app.post('/download', async (req, res) => {
     const { url, format } = req.body;
     if (!url) return res.status(400).json({ error: 'No URL provided' });
+    const info = await youtubedl(url, { dumpSingleJson: true, cookies: COOKIES_FILE });
+    queue.push({ url, format, info });
+    saveQueue();
     if (isDownloading) {
-        queue.push({url,format});
         res.status(202).json({ response: 'Download already running!\nAdded to queue' });
         return;
     }
     try {
-        var ret = await download(url, format);
+        var ret = await download(url, format, info);
         res.json(ret);
 
     } catch (error) {
@@ -80,10 +85,11 @@ app.post('/download', async (req, res) => {
     }
 });
 
-async function download(url, format) {
+async function download(url, format, info) {
     isDownloading = true;
-    const info = await youtubedl(url, { dumpSingleJson: true, cookies: COOKIES_FILE });
     const channel = info.uploader || 'Unknown_Channel';
+    const title = info.title || 'Unknown_Title';
+    console.log(`Starting download: ${title} from ${channel}`);
     const outputDir = path.join(DOWNLOAD_DIR, channel);
 
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
@@ -99,7 +105,7 @@ async function download(url, format) {
     //console.log(options.ffmpegLocation);
     //console.log(options.format);
 
-    const process = youtubedl.exec(url, options);
+    /* const process = youtubedl.exec(url, options);
 
     process.stdout.on('data', (chunk) => {
         //console.log(chunk.toString());
@@ -118,18 +124,13 @@ async function download(url, format) {
     process.on('close', () => {
         sendProgress({ percent: 100, title: info.title, done: true });
         isDownloading = false;
-    });
+    }); */
 
     return { success: true }
 
 }
 
-async function getVideoDetails(url){
-    const info = await youtubedl(url, { dumpSingleJson: true, cookies: COOKIES_FILE });
-    const channel = info.uploader || 'Unknown_Channel';
-}
-
-function getExistingQueue() {
+function readQueue() {
     var queue = [];
     if (fs.existsSync(path.join(__dirname, ".queue"))) {
         var queueData = fs.readFileSync(utils.QUEUEFILE, { encoding: "utf-8" });
@@ -141,6 +142,11 @@ function getExistingQueue() {
         }
     }
     return queue;
+}
+
+function saveQueue() {
+    var queueData = queue.map(item => `${item.url}#${item.format}#${info.title || 'Unknown_Title'}#${info.uploader || 'Unknown_Channel'}`).join(";");
+    fs.writeFileSync(path.join(__dirname, ".queue"), queueData, { encoding: "utf-8", flag: "w" });
 }
 
 app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));
