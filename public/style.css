@@ -18,6 +18,80 @@ body {
     box-shadow: 0 0 10px rgba(0,0,0,0.7);
 }
 
+.queuetainer{
+    background: #1e1e1e;
+    padding: 20px 30px;
+    margin-left: 130px;
+    border-radius: 8px;
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0,0,0,0.7);
+}
+
+#queueList{
+    text-align: left;
+    color: #ccc;
+    max-height: 300px;
+    overflow-y: auto;
+    margin-top: 10px;
+    font-size: 18px;
+    border: 1px solid #333;
+    padding: 10px;
+    border-radius: 5px;
+    background: #222;
+    list-style: none;
+    line-height: 1.5;
+}
+
+.queue-item {
+    padding: 5px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.queue-item.disabled {
+    cursor: not-allowed;
+}
+
+.status-downloading {
+    color: #4caf50;
+}
+
+.remove-btn{
+    float: right;
+    background: #ff4c4c;
+    background-size: cover;
+    border: none;
+    color: white;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 2px 5px;
+    display: none;
+}
+
+.remove-btn{
+    float: right;
+    background: #ff4c4c;
+    background-size: cover;
+    border: none;
+    color: white;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 2px 5px;
+    display: none;
+}
+
+.selected .remove-btn{
+    display: inline;
+}
+
+.selected {
+    background: #ff4c4c !important;
+    color: white !important;
+}   
+
 h1 {
     margin-bottom: 15px;
     color: #ff4c4c;
