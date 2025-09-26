@@ -6,6 +6,17 @@ import { fileURLToPath } from 'url';
 import fs from 'fs';
 import '@dotenvx/dotenvx/config'
 
+function validateEnv() {
+    const requiredVars = ['OUTPUT_DIRECTORY', 'FFMPEG_DIRECTORY', 'PORT'];
+    requiredVars.forEach((key) => {
+        if (!process.env[key]) {
+            console.error(`Missing required environment variable: ${key}`);
+            process.exit(1);
+        }
+    });
+}
+
+validateEnv();
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
@@ -35,7 +46,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 let progressClients = [];
 let queueClients = [];
-let queue = readQueue();
+let queue = await readQueue();
 let errored = [];
 
 if (queue.length > 0) {
@@ -50,34 +61,6 @@ if (queue.length > 0) {
     }
 }
 
-// SSE route for progress updates
-app.get('/progress', (req, res) => {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.flushHeaders();
-    progressClients.push(res);
-
-    req.on('close', () => {
-        progressClients = progressClients.filter(c => c !== res);
-    });
-});
-
-// SSE route for queue updates
-app.get('/queue', (req, res) => {
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.flushHeaders();
-    queueClients.push(res);
-    if (queue.length > 0)
-        res.write(`data: ${JSON.stringify(queue.map(item => ({ title: item.info.title || 'Unknown_Title', id: item.info.id, currentStatus: currentItem == item.info.id ? STATUS.DOWNLOADING : STATUS.QUEUED })))}\n\n`);
-    else
-        res.write(`data: ${JSON.stringify([])}\n\n`);
-    req.on('close', () => {
-        queueClients = queueClients.filter(c => c !== res);
-    });
-});
 
 function sendProgress(data) {
     progressClients.forEach(client => client.write(`data: ${JSON.stringify(data)}\n\n`));
@@ -91,30 +74,30 @@ app.get('/', (req, res) => {
 });
 
 app.post('/download', async (req, res) => {
-    const { url, format } = req.body;
-    if (!url) return res.status(400).json({ error: 'No URL provided' });
-    const info = await youtubedl(url, { dumpSingleJson: true, cookies: COOKIES_FILE });
-    queue.push({ url, format, info });
-    saveQueue();
-    if (isDownloading) {
-        res.status(202).json({ response: 'Download already running!\nAdded to queue' });
-        return;
-    }
     try {
+        const { url, format } = req.body;
+        if (!url) return res.status(400).json({ error: 'No URL provided' });
+        const info = await youtubedl(url, { dumpSingleJson: true, cookies: COOKIES_FILE });
+        queue.push({ url, format, info });
+        saveQueue();
+        sendQueueUpdate();
+
+        if (isDownloading) {
+            return res.status(202).json({ response: 'Download already running!\nAdded to queue' });
+        }
+
         currentItem = queue.find(item => item.url === url);
         var ret = await download(url, format, info);
         res.json(ret);
-
     } catch (error) {
         console.error(error);
-        
-        res.status(500).json({ error: 'Download failed' });
+        res.status(500).json({ error: error.message || 'Download failed' }); 
     }
 });
 
 app.post('/remove', async (req, res) => {
     const { id } = req.body;
-    if (!id) return res.status(400).json({ error: 'No ID provided' }); 
+    if (!id) return res.status(400).json({ error: 'No ID provided' });
 
     // Remove the item from the queue
     queue = queue.filter(item => item.id !== id);
@@ -171,23 +154,25 @@ async function download(url, format, info) {
 
 }
 
-function readQueue() {
-    var queue = [];
-    if (fs.existsSync(path.join(__dirname, ".queue"))) {
-        var queueData = fs.readFileSync(utils.QUEUEFILE, { encoding: "utf-8" });
-        var queueItems = queueData.split(";");
-        for (let i = 0; i < queueItems.length; i++) {
-            let item = queueItems[i];
-            let data = item.split("#");
-            queue.push({ "url": data[0], "format": data[1] });
-        }
-    }
-    return queue;
+async function readQueue() {
+    const queueFilePath = path.join(__dirname, ".queue");
+    if (!fs.existsSync(queueFilePath)) return [];
+
+    const queueData = await fs.promises.readFile(queueFilePath, { encoding: "utf-8" });
+    return queueData.split(";").map(item => {
+        const [url, format] = item.split("#");
+        return { url, format };
+    });
 }
 
 function saveQueue() {
     var queueData = queue.map(item => `${item.url}#${item.format}#${item.info.title || 'Unknown_Title'}#${item.info.uploader || 'Unknown_Channel'}`).join(";");
     fs.writeFileSync(path.join(__dirname, ".queue"), queueData, { encoding: "utf-8", flag: "w" });
 }
+
+process.on('SIGINT', () => {
+    console.log('Shutting down server...');
+    process.exit(0);
+});
 
 app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));

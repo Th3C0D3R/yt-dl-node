@@ -1,117 +1,69 @@
-# 🎥 yt-dl-node  
-*A powerful Node.js YouTube downloader using `youtube-dl-exec` (yt-dlp) & FFmpeg*  
+# yt-dl-node
 
-![Node.js](https://img.shields.io/badge/Node.js-18+-green?logo=node.js)
-![yt-dlp](https://img.shields.io/badge/yt--dlp-latest-blue)
-![License](https://img.shields.io/badge/license-MIT-yellow)
-![PRs Welcome](https://img.shields.io/badge/PRs-Welcome-brightgreen)
+## Overview
+yt-dl-node is a Node.js application that allows users to download videos from various platforms using a simple web interface. The application utilizes the `youtube-dl-exec` library to handle video downloads and provides real-time progress updates through Server-Sent Events (SSE).
 
----
+## Features
+- Download videos from supported platforms.
+- Manage a download queue.
+- Real-time progress updates for ongoing downloads.
+- Simple and intuitive web interface.
 
-## 📜 Description  
-**yt-dl-node** is a **Node.js web app** that allows you to download YouTube **videos or playlists** in high quality.  
-It uses:  
-✅ [`youtube-dl-exec`](https://github.com/microlinkhq/youtube-dl-exec) (a Node wrapper for **yt-dlp**)  
-✅ **FFmpeg** (for audio/video processing)  
-
-Features:  
-- 🛠 Downloads videos to a **custom output directory** (by channel name)  
-- 📂 **Categorized storage** per YouTube channel  
-- 🎚 **Quality selection** (best, 720p, 480p)  
-- ✅ Playlist & single video support  
-- 🖥 Simple **web interface** with progress bar  
-
----
-
-## ⚙️ Installation  
-
-```bash
-# 1. Clone the repository
-git clone https://github.com/Th3C0D3R/yt-dl-node.git
-cd yt-dl-node
-
-# 2. Install dependencies
-npm install
-
-# 3. Make sure you have FFmpeg installed
-#    Download: https://ffmpeg.org/download.html
+## Project Structure
+```
+yt-dl-node
+├── src
+│   ├── app.js                   # Entry point of the application
+│   ├── routes                   # Contains route definitions
+│   │   ├── index.js             # Main application routes
+│   │   └── download.js          # Routes related to downloading
+│   ├── services                 # Contains business logic
+│   │   ├── downloadService.js   # Functions for downloading videos
+│   │   └── queueService.js      # Functions for managing the download queue
+│   ├── utils                    # Utility functions
+│   │   ├── notifications.js     # Notifications for users
+│   │   ├── logger.js            # winston logger 
+│   │   └── validateEnv.js       # Validates environment variables
+│   └── views                    # View templates
+│       └── index.ejs            # Main view template
+├── public                       # Static files (CSS, JS, etc.)
+├── .env                         # Environment variables
+├── .queue                       # Stores download queue data
+├── package.json                 # npm configuration file
+└── package-lock.json            # Locks dependency versions
 ```
 
----
+## Installation
+1. Clone the repository:
+   ```
+   git clone <repository-url>
+   cd yt-dl-node
+   ```
 
-## 🔧 Configuration  
+2. Install dependencies:
+   ```
+   npm install
+   ```
 
-Create a `.env` file in the root directory:  
+3. Create a `.env` file in the root directory and set the required environment variables:
+   ```
+   OUTPUT_DIRECTORY=<your_output_directory>
+   FFMPEG_DIRECTORY=<path_to_ffmpeg>
+   PORT=<port_number>
+   ```
 
-```env
-FFMPEG_DIRECTORY="C:\\Path\\To\\FFmpeg\\bin"
-OUTPUT_DIRECTORY="C:\\Path\\To\\Somewhere"
-COOKIES_FILE="C:\\Path\\To\\Cookies_FILE"
-PORT=3000
-```
-
-- **FFMPEG_DIRECTORY** → Path where your `ffmpeg.exe` is located  
-- **OUTPUT_DIRECTORY** → Base folder for downloaded videos (they will be stored by channel name)  
-- **COOKIES_FILE** → Sometimes, Youtube prevents from downloading because they think you are a bot → cookies.txt will help **_*1_**
-- **PORT** → Port of the Server
-
-
-**_*1_**) See https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp how to get cookies.txt
-
----
-
-## ✅ Instructions  
-
-1. **Start the server:**  
-   ```bash
+## Usage
+1. Start the application:
+   ```
    npm start
    ```
-2. Open in your browser:  
-   ```
-   http://localhost:3000
-   ```
-3. Enter a **YouTube URL** (video or playlist)  
-4. Choose the **quality** and click **Download**  
-5. Progress will be shown in real-time ✅  
 
----
+2. Open your web browser and navigate to `http://localhost:<port_number>`.
 
-## 🗒️ To-Do  
-- [ WIP ] Add **multi-download queue** 
-- [ ] Support **audio-only (MP3)** 
-- [ ] Download **channel thumbnail & metadata** 
-- [ ] Docker support for easy deployment  
+3. Use the interface to enter video URLs and manage downloads.
 
----
+## Contributing
+Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
 
-## 🤝 Contribute  
-
-We ❤️ contributions!  
-Here’s how you can help:  
-1. **Fork** the repository  
-2. **Create a new branch** (`feature/your-feature`)  
-3. **Commit your changes**  
-4. **Push to your branch**  
-5. Open a **Pull Request (PR)**  
-
-**Guidelines:**  
-- Follow existing **code style**  
-- Make sure your code is **well-documented**  
-- Include a **clear description** in your PR  
-
----
-
-### 💡 Ideas & Issues  
-Have suggestions or found a bug?  
-👉 Open an **Issue** [here](https://github.com/Th3C0D3R/yt-dl-node/issues)  
-
----
-
-## 🛠 Tech Stack  
-- **Node.js** + **Express**  
-- **youtube-dl-exec** (yt-dlp backend)  
-- **FFmpeg** for processing  
-
----
-
-### ⭐ If you like this project, **star the repo** and share it with others!  
+## License
+This project is licensed under the MIT License. See the LICENSE file for details.

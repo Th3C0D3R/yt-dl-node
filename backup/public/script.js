@@ -1,0 +1,89 @@
+document.getElementById('downloadBtn').addEventListener('click', async () => {
+    const url = document.getElementById('url').value;
+    const quality = document.getElementById('quality').value;
+
+    if (!url) {
+        alert('Please enter a YouTube URL');
+        return;
+    }
+
+    document.getElementById('status').textContent = 'Starting download...';
+
+    await fetch('/download', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url, format: quality })
+    });
+});
+
+// Listen for progress updates
+const evtProgress = new EventSource('/progress');
+evtProgress.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    const progressBar = document.getElementById('progressBar');
+    const status = document.getElementById('status');
+
+    if (data.done) {
+        progressBar.style.width = '100%';
+        status.textContent = `✅ Download complete: ${data.title}`;
+    } else {
+        progressBar.style.width = `${data.percent}%`;
+        status.textContent = `Downloading: ${data.title} - ${data.percent}%`;
+    }
+};
+
+var selectedItems = [];
+const evtQueue = new EventSource('/queue');
+evtQueue.onmessage = (event) => {
+    
+    var data = JSON.parse(event.data);
+    const queueList = document.getElementById('queueList');
+    selectedItems = Array.from(document.getElementsByClassName('selected')).map(item => item.dataset.id);
+    queueList.innerHTML = '';
+    if (data.length === 0) {
+        const li = document.createElement('li');
+        li.textContent = 'No download in queue';
+        li.classList.add('queue-item', 'disabled');
+        queueList.appendChild(li);
+        return;
+    }
+
+    data.forEach(item => {
+        const li = document.createElement('li');
+        li.textContent = item.title;
+        li.dataset.id = item.id;
+        li.classList.add('queue-item');
+        if (selectedItems.includes(item.id)) {
+            li.classList.add('selected');
+        }
+
+        //add remove queue item on click at small trash icon
+        const removeBtn = document.createElement('button');
+        removeBtn.innerHTML = '🗑️';
+        removeBtn.classList.add('remove-btn');
+        removeBtn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            await fetch('/remove', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: item.id })
+            });
+        });
+        li.appendChild(removeBtn);
+
+        li.addEventListener('click', () => {
+            Array.from(document.getElementsByClassName('selected')).forEach(el => {
+                el.classList.remove('selected');
+            });
+            if (li.classList.contains('selected')) {
+                li.classList.remove('selected');
+                return;
+            }
+            else {
+                li.classList.add('selected');
+                li.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+        });
+        queueList.appendChild(li);
+    });
+} 
