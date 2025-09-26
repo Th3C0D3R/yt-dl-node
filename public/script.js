@@ -1,3 +1,9 @@
+const STATUS = {
+    QUEUED: 'queued',
+    DOWNLOADING: 'downloading',
+    ERROR: 'error'
+};
+
 document.getElementById('downloadBtn').addEventListener('click', async () => {
     const url = document.getElementById('url').value;
     const quality = document.getElementById('quality').value;
@@ -9,7 +15,7 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
 
     document.getElementById('status').textContent = 'Starting download...';
 
-    await fetch('/download', {
+    await fetch('/api/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, format: quality })
@@ -50,20 +56,36 @@ evtQueue.onmessage = (event) => {
 
     data.forEach(item => {
         const li = document.createElement('li');
-        li.textContent = item.title;
-        li.dataset.id = item.id;
         li.classList.add('queue-item');
+        li.dataset.id = item.id;
         if (selectedItems.includes(item.id)) {
             li.classList.add('selected');
         }
 
-        //add remove queue item on click at small trash icon
+        // Status icon
+        const statusIcon = document.createElement('span');
+        statusIcon.classList.add('status-icon');
+        if (item.currentStatus === 'DOWNLOADING' || item.currentStatus === STATUS?.DOWNLOADING) {
+            statusIcon.textContent = '⬇️'; // Downloading icon
+        } else if (item.currentStatus === 'QUEUED' || item.currentStatus === STATUS?.QUEUED) {
+            statusIcon.textContent = '⏳'; // Queued icon
+        } else {
+            statusIcon.textContent = '';
+        }
+        li.appendChild(statusIcon);
+
+        // Title
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = item.title;
+        li.appendChild(titleSpan);
+
+        // Remove button
         const removeBtn = document.createElement('button');
         removeBtn.innerHTML = '🗑️';
         removeBtn.classList.add('remove-btn');
         removeBtn.addEventListener('click', async (e) => {
             e.stopPropagation();
-            await fetch('/remove', {
+            await fetch('/api/remove', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ id: item.id })

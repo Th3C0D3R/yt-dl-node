@@ -1,5 +1,6 @@
 import { getQueue } from '../services/queueService.js';
 import { getCurrentItem } from '../services/downloadService.js';
+import { STATUS } from './constants.js';
 
 let progressClients = [];
 let queueClients = [];

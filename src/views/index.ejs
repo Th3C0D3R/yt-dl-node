@@ -1,28 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>YouTube Downloader</title>
-    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
-    <header>
-        <h1>YouTube Video Downloader</h1>
-    </header>
-    <main>
-        <form id="downloadForm">
-            <input type="text" id="url" placeholder="Enter YouTube URL" required>
-            <select id="format">
-                <option value="best">Best Format</option>
-                <option value="mp4">MP4</option>
-                <option value="m4a">M4A</option>
+    <div class="container">
+        <h1>YouTube Downloader</h1>
+        <div class="form-group">
+            <input type="text" id="url" placeholder="Enter YouTube URL">
+            <select id="quality">
+                <option value="bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4] / bv*+ba/b">Best (Large Files)</option>
+                <option
+                    value="bv*[height<=1080][ext=mp4]+ba[ext=m4a]/b[height<=1080][ext=mp4] / bv*[height<=1080]+ba/b[height<=1080]">
+                    1080p</option>
+                <option
+                    value="bv*[height<=720][ext=mp4]+ba[ext=m4a]/b[height<=720][ext=mp4] / bv*[height<=720]+ba/b[height<=720]">
+                    720p</option>
+                <option
+                    value="bv*[height<=480][ext=mp4]+ba[ext=m4a]/b[height<=480][ext=mp4] / bv*[height<=480]+ba/b[height<=480]">
+                    480p</option>
             </select>
-            <button type="submit">Download</button>
-        </form>
-        <div id="progress"></div>
-        <div id="queue"></div>
-    </main>
+            <button id="downloadBtn">Download</button>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <p id="status">Waiting...</p>
+    </div>
+
+    <div class="queuetainer">
+        <h1>Downloader Queue</h1>
+        <ul id="queueList">
+        </ul>
+    </div>
+
     <script src="/script.js"></script>
 </body>
+
 </html>
