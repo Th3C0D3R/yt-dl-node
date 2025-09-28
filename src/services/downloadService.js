@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { sendProgress, sendQueueUpdate } from '../utils/notifications.js'; // Assuming you have a notifications utility for sending updates
 import { STATUS, COOKIES_FILE, DOWNLOAD_DIR, FFMPEG_DIR } from '../utils/constants.js';
-import { getQueue } from '../services/queueService.js';
+import { getQueue,removeQueueId } from '../services/queueService.js';
 import logger from '../utils/logger.js';
 
 const bestFormat = "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]";
@@ -15,6 +15,8 @@ export async function download(url, format, info) {
         return;
     }
     isDownloading = true; 
+    setCurrentItem(getQueue().find(item => item.url === url));
+    sendQueueUpdate(getQueue(), currentItem, STATUS);
     const channel = info?.uploader || 'Unknown_Channel';
     const title = info?.title || 'Unknown_Title';
     logger.info(`Starting download: ${title} from ${channel}`);
@@ -28,7 +30,7 @@ export async function download(url, format, info) {
         progress: true,
         cookies: COOKIES_FILE
     };
-
+    sendProgress({ percent, title: `Starting download: ${title} from ${channel}` });
     const process = youtubedl.exec(url, options);
 
     process.stdout.on('data', (chunk) => {
@@ -50,7 +52,9 @@ export async function download(url, format, info) {
         currentItem = null;
         isDownloading = false;
         // Additional logic to remove the item from the queue can be added here
-        sendQueueUpdate(getQueue(), null, STATUS);
+        removeQueueId(info.id);
+        // Notify all clients about the updated queue
+        sendQueueUpdate(getQueue(), currentItem, STATUS);
     });
 
     return { success: true };
@@ -66,4 +70,5 @@ export function getCurrentItem() {
 
 export function setCurrentItem(item) {
     currentItem = item;
+    sendQueueUpdate(getQueue(), currentItem, STATUS);
 }

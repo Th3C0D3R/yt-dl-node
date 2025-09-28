@@ -8,6 +8,7 @@ import logger from './utils/logger.js';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import { PORT } from './utils/constants.js';
+import { processQueue } from './routes/download.js';
 
 validateEnv();
 
@@ -26,3 +27,5 @@ app.use(express.static(path.join(projectRoot, 'public')));
 setupRoutes(app);
 
 app.listen(PORT, () => logger.info(`Server running at http://localhost:${PORT}`));
+
+processQueue();

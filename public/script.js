@@ -32,7 +32,7 @@ evtProgress.onmessage = (event) => {
     if (data.done) {
         progressBar.style.width = '100%';
         status.textContent = `✅ Download complete: ${data.title}`;
-    } else {
+    } else if(data.percent >= parseInt(progressBar.style.width.replace("%",""))) {
         progressBar.style.width = `${data.percent}%`;
         status.textContent = `Downloading: ${data.title} - ${data.percent}%`;
     }
@@ -74,10 +74,11 @@ evtQueue.onmessage = (event) => {
         }
         li.appendChild(statusIcon);
 
-        // Title
-        const titleSpan = document.createElement('span');
-        titleSpan.textContent = item.title;
-        li.appendChild(titleSpan);
+    // Title
+    const titleSpan = document.createElement('span');
+    titleSpan.textContent = item.title;
+    titleSpan.title = item.title; // Tooltip with full title
+    li.appendChild(titleSpan);
 
         // Remove button
         const removeBtn = document.createElement('button');

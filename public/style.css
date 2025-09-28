@@ -43,10 +43,28 @@ body {
     line-height: 1.5;
 }
 
+/* Truncate long queue item titles and show tooltip */
 .queue-item {
-    padding: 5px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
     cursor: pointer;
     user-select: none;
+}
+.queue-item .status-icon {
+    flex-shrink: 0;
+    margin-right: 4px;
+}
+.queue-item span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+}
+.queue-item .remove-btn {
+    margin-left: auto;
+    flex-shrink: 0;
 }
 
 .queue-item.disabled {

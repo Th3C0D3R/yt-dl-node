@@ -29,36 +29,13 @@ export function setupSSE(app) {
         queueClients.push(res);
         var queue = getQueue();
         if (queue.length > 0)
-            res.write(`data: ${JSON.stringify(queue.map(item => ({ title: item.info.title || 'Unknown_Title', id: item.info.id, currentStatus: getCurrentItem() == item.info.id ? STATUS.DOWNLOADING : STATUS.QUEUED })))}\n\n`);
+            res.write(`data: ${JSON.stringify(queue.map(item => ({ title: item?.title || 'Unknown_Title', id: item.id, currentStatus: getCurrentItem().id == item.id ? STATUS.DOWNLOADING : STATUS.QUEUED })))}\n\n`);
         else
             res.write(`data: ${JSON.stringify([])}\n\n`);
 
         req.on('close', () => {
             queueClients = queueClients.filter(c => c !== res);
         });
-    });
-}
-
-
-/**
- * Registers a new progress client for Server-Sent Events (SSE).
- * @param {object} res - The response object for SSE.
- */
-export function registerProgressClient(res) {
-    progressClients.push(res);
-    res.on('close', () => {
-        progressClients = progressClients.filter(client => client !== res);
-    });
-}
-
-/**
- * Registers a new queue client for Server-Sent Events (SSE).
- * @param {object} res - The response object for SSE.
- */
-export function registerQueueClient(res) {
-    queueClients.push(res);
-    res.on('close', () => {
-        queueClients = queueClients.filter(client => client !== res);
     });
 }
 
@@ -78,9 +55,9 @@ export function sendProgress(data) {
  */
 export function sendQueueUpdate(queue, currentItemId, STATUS) {
     const queueData = queue.map(item => ({
-        title: item.info.title || 'Unknown_Title',
-        id: item.info.id,
-        currentStatus: currentItemId === item.info.id ? STATUS.DOWNLOADING : STATUS.QUEUED
+        title: item?.title || 'Unknown_Title',
+        id: item.id,
+        currentStatus: currentItemId.id === item.id ? STATUS.DOWNLOADING : STATUS.QUEUED
     }));
     queueClients.forEach(client => client.write(`data: ${JSON.stringify(queueData)}\n\n`));
 }
