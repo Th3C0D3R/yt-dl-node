@@ -9,6 +9,8 @@ import { fileURLToPath } from 'url';
 import path from 'path';
 import { PORT } from './utils/constants.js';
 import { processQueue } from './routes/download.js';
+import { cancelDownload } from './services/downloadService.js';
+import process from 'process';
 
 validateEnv();
 
@@ -27,5 +29,14 @@ app.use(express.static(path.join(projectRoot, 'public')));
 setupRoutes(app);
 
 app.listen(PORT, () => logger.info(`Server running at http://localhost:${PORT}`));
-
+process.on('SIGKILL', () => {
+    logger.info('Server shutdown hard...');
+    cancelDownload();
+    process.exit();
+});
+process.on('SIGINT', () => {
+    logger.info('Shutting down server graceful...');
+    cancelDownload();
+    process.exit();
+});
 processQueue();

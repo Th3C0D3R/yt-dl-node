@@ -15,11 +15,26 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
 
     document.getElementById('status').textContent = 'Starting download...';
 
-    await fetch('/api/download', {
+    var res = await fetch('/api/download', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url, format: quality })
     });
+
+    if (res.status === 202) {
+        const data = await res.json();
+        showToast(data.response,"blue",3000);
+    }
+    else if(res.status != 200) {
+        const err = await res.json();
+        showToast(`Error: ${err?.error || 'Unknown error'}`,"red",5000);
+        document.getElementById('status').textContent = `Error: ${err?.error || 'Unknown error'}`;
+    }
+    else{
+        const data = await res.json();
+        showToast('Download started successfully!', "green", 3000);
+        document.getElementById('status').textContent = 'Download started successfully!';
+    }
 });
 
 // Listen for progress updates
@@ -28,11 +43,12 @@ evtProgress.onmessage = (event) => {
     const data = JSON.parse(event.data);
     const progressBar = document.getElementById('progressBar');
     const status = document.getElementById('status');
-
+    var currentWidth = parseInt(progressBar.style.width.replace("%", "") || "0");
     if (data.done) {
         progressBar.style.width = '100%';
         status.textContent = `✅ Download complete: ${data.title}`;
-    } else if(data.percent >= parseInt(progressBar.style.width.replace("%",""))) {
+        showToast(status.textContent, "green", 3000);
+    } else if (data.percent >= currentWidth) {
         progressBar.style.width = `${data.percent}%`;
         status.textContent = `Downloading: ${data.title} - ${data.percent}%`;
     }
@@ -41,7 +57,7 @@ evtProgress.onmessage = (event) => {
 var selectedItems = [];
 const evtQueue = new EventSource('/queue');
 evtQueue.onmessage = (event) => {
-    
+
     var data = JSON.parse(event.data);
     const queueList = document.getElementById('queueList');
     selectedItems = Array.from(document.getElementsByClassName('selected')).map(item => item.dataset.id);
@@ -74,11 +90,11 @@ evtQueue.onmessage = (event) => {
         }
         li.appendChild(statusIcon);
 
-    // Title
-    const titleSpan = document.createElement('span');
-    titleSpan.textContent = item.title;
-    titleSpan.title = item.title; // Tooltip with full title
-    li.appendChild(titleSpan);
+        // Title
+        const titleSpan = document.createElement('span');
+        titleSpan.textContent = item.title;
+        titleSpan.title = item.title; // Tooltip with full title
+        li.appendChild(titleSpan);
 
         // Remove button
         const removeBtn = document.createElement('button');
@@ -109,4 +125,19 @@ evtQueue.onmessage = (event) => {
         });
         queueList.appendChild(li);
     });
-} 
+}
+
+function showToast(message, type = 'blue', duration = 3000) {
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = 'toast';
+    if (type === 'red') toast.classList.add('toast-red');
+    else if (type === 'green') toast.classList.add('toast-green');
+    else toast.classList.add('toast-blue');
+    toast.textContent = message;
+    container.appendChild(toast);
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        setTimeout(() => container.removeChild(toast), 300);
+    }, duration);
+}

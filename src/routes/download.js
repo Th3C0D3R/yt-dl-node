@@ -1,13 +1,14 @@
 import express from 'express';
 import youtubedl from 'youtube-dl-exec';
 import { saveQueue, readQueue, addToQueue, getQueue, removeQueueId } from '../services/queueService.js';
-import { download, setCurrentItem } from '../services/downloadService.js';
+import { download, setCurrentItem, isCurrentlyDownloading, setDownloading, getCurrentItem } from '../services/downloadService.js';
+import { sendQueueUpdate } from '../utils/notifications.js';
+import { STATUS } from '../utils/constants.js';
 import { sleep } from '../utils/helpers.js';
 import logger from '../utils/logger.js';
 
 const router = express.Router();
 
-let isDownloading = false;
 await readQueue();
 
 router.post('/download', async (req, res) => {
@@ -21,13 +22,15 @@ router.post('/download', async (req, res) => {
         addToQueue({ url, format, id: info?.id, title: info?.title || 'Unknown_Title', uploader: info?.uploader || 'Unknown_Channel' });
         saveQueue();
 
-        if (isDownloading) {
+        sendQueueUpdate(getQueue(), getCurrentItem(), STATUS);
+        if (isCurrentlyDownloading()) {
             return res.status(202).json({ response: 'Download already running!\nAdded to queue' });
         }
-
+        setDownloading(true);
         setCurrentItem(getQueue().find(item => item.url === url));
-        var ret = { success: true }; //await download(url, format, info);
-        res.json(ret);
+        var ret = await download(url, format, info);
+        res.status(200).json(ret);
+        sendQueueUpdate(getQueue(), getCurrentItem(), STATUS);
     } catch (error) {
         logger.error(`Download failed: ${error.message}`);
         res.status(500).json({ error: error.message || 'Download failed' });
@@ -42,19 +45,19 @@ router.post('/remove', async (req, res) => {
 });
 
 export const processQueue = async () => {
-    if (isDownloading) return;
-    isDownloading = true;
+    if (isCurrentlyDownloading()) return;
+    setDownloading(true);
     while (getQueue().length > 0) {
         const item = getQueue()[0];
         setCurrentItem(item);
-        //await download(item.url, item.format, item);
-        await sleep(20000); // delay for testing
+        await download(item.url, item.format, item);
+        //await sleep(20000); // delay for testing
         removeQueueId(item.id);
-    }   
+    }
     setCurrentItem(null);
-    isDownloading = false;
+    setDownloading(false);
     logger.info('Queue processing complete');
-    //saveQueue();
+    saveQueue();
 };
 
 export default router;
