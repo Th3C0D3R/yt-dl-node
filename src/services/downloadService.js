@@ -5,6 +5,7 @@ import { sendProgress, sendQueueUpdate } from '../utils/notifications.js'; // As
 import { STATUS, COOKIES_FILE, DOWNLOAD_DIR, FFMPEG_DIR } from '../utils/constants.js';
 import { getQueue, removeQueueId } from '../services/queueService.js';
 import logger from '../utils/logger.js';
+import { processQueue } from '../routes/download.js';
 
 const bestFormat = "bv*[ext=mp4]+ba[ext=m4a]/b[ext=mp4]";
 let isDownloading = false;
@@ -32,7 +33,7 @@ export async function download(url, format, info) {
         progress: true,
         cookies: COOKIES_FILE
     };
-    sendProgress({ percent: 0, title: `Starting download: ${title} from ${channel}` });
+    sendProgress({ percent: 0, title: `Starting download: ${title} from ${channel}`, done: false });
     ytdlProcess = youtubedl.exec(url, options);
 
     ytdlProcess.stdout.on('data', (chunk) => {
@@ -48,15 +49,12 @@ export async function download(url, format, info) {
         }
     });
 
-    ytdlProcess.on('close', () => {
+    ytdlProcess.on('close', async () => {
         logger.info(`Download complete: ${info.title}`);
         sendProgress({ percent: 100, title: info.title, done: true });
-        currentItem = null;
-        isDownloading = false;
-        // Additional logic to remove the item from the queue can be added here
         removeQueueId(info.id);
-        // Notify all clients about the updated queue
-        sendQueueUpdate(getQueue(), currentItem, STATUS);
+        isDownloading = false;
+        await processQueue();
     });
 
     return { success: true };

@@ -23,14 +23,14 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
 
     if (res.status === 202) {
         const data = await res.json();
-        showToast(data.response,"blue",3000);
+        showToast(data.response, "blue", 3000);
     }
-    else if(res.status != 200) {
+    else if (res.status != 200) {
         const err = await res.json();
-        showToast(`Error: ${err?.error || 'Unknown error'}`,"red",5000);
+        showToast(`Error: ${err?.error || 'Unknown error'}`, "red", 5000);
         document.getElementById('status').textContent = `Error: ${err?.error || 'Unknown error'}`;
     }
-    else{
+    else {
         const data = await res.json();
         showToast('Download started successfully!', "green", 3000);
         document.getElementById('status').textContent = 'Download started successfully!';
@@ -38,6 +38,8 @@ document.getElementById('downloadBtn').addEventListener('click', async () => {
 });
 
 // Listen for progress updates
+document.getElementById('progressBar').style.width = '0%';
+document.getElementById('status').textContent = 'Waiting...';
 const evtProgress = new EventSource('/progress');
 evtProgress.onmessage = (event) => {
     const data = JSON.parse(event.data);
@@ -48,8 +50,9 @@ evtProgress.onmessage = (event) => {
         progressBar.style.width = '100%';
         status.textContent = `✅ Download complete: ${data.title}`;
         showToast(status.textContent, "green", 3000);
-    } else if (data.percent >= currentWidth) {
+    } else if (data.percent >= currentWidth && currentWidth == 100 && data.done != true) {
         progressBar.style.width = `${data.percent}%`;
+        currentWidth = data.percent;
         status.textContent = `Downloading: ${data.title} - ${data.percent}%`;
     }
 };

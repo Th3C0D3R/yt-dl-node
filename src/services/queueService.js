@@ -15,10 +15,14 @@ export async function readQueue() {
     if (!fs.existsSync(queueFilePath)) return [];
 
     const queueData = await fs.promises.readFile(queueFilePath, { encoding: "utf-8" });
-    return queue = queueData.split(";").map(item => {
+    if(queueData.length <= 0) return queue = [];
+    const items = queueData.split(";");
+    if(items.length <= 0) return queue = [];
+    queue = items.map(item => {
         const [url, format, id, title, uploader] = item.split("#");
         return { url, format, id, title, uploader };
-    });
+    })
+    return queue;
 }
 
 export function saveQueue() {

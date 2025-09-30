@@ -47,13 +47,14 @@ router.post('/remove', async (req, res) => {
 export const processQueue = async () => {
     if (isCurrentlyDownloading()) return;
     setDownloading(true);
-    while (getQueue().length > 0) {
+    if (getQueue().length > 0) {
         const item = getQueue()[0];
         setCurrentItem(item);
         await download(item.url, item.format, item);
         //await sleep(20000); // delay for testing
-        removeQueueId(item.id);
     }
+    if(getQueue().length > 0) 
+        return await processQueue();
     setCurrentItem(null);
     setDownloading(false);
     logger.info('Queue processing complete');

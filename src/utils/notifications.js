@@ -54,11 +54,10 @@ export function sendProgress(data) {
  * @param {object} STATUS - The status constants.
  */
 export function sendQueueUpdate(queue, currentItemId, STATUS) {
-    if(currentItemId == null) return queueClients.forEach(client => client.write(`data: ${JSON.stringify([])}\n\n`));
     const queueData = queue.map(item => ({
         title: item?.title || 'Unknown_Title',
         id: item.id,
-        currentStatus: currentItemId.id === item.id ? STATUS.DOWNLOADING : STATUS.QUEUED
+        currentStatus: currentItemId?.id === item.id ? STATUS.DOWNLOADING : STATUS.QUEUED
     }));
     queueClients.forEach(client => client.write(`data: ${JSON.stringify(queueData)}\n\n`));
 }
