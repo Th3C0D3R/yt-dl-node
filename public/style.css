@@ -46,6 +46,7 @@ body {
     width: 400px;
     text-align: center;
     box-shadow: 0 0 10px rgba(0,0,0,0.7);
+    margin-top: 50px;
 }
 
 .queuetainer{

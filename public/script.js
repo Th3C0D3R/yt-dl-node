@@ -50,7 +50,7 @@ evtProgress.onmessage = (event) => {
         progressBar.style.width = '100%';
         status.textContent = `✅ Download complete: ${data.title}`;
         showToast(status.textContent, "green", 3000);
-    } else if (data.percent >= currentWidth && currentWidth == 100 && data.done != true) {
+    } else if (data.percent >= currentWidth || (currentWidth == 100 && data.done != true)) {
         progressBar.style.width = `${data.percent}%`;
         currentWidth = data.percent;
         status.textContent = `Downloading: ${data.title} - ${data.percent}%`;

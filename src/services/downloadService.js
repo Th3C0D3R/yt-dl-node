@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import { sendProgress, sendQueueUpdate } from '../utils/notifications.js'; // Assuming you have a notifications utility for sending updates
 import { STATUS, COOKIES_FILE, DOWNLOAD_DIR, FFMPEG_DIR } from '../utils/constants.js';
-import { getQueue, removeQueueId } from '../services/queueService.js';
+import { getQueue, removeQueueId, saveQueue } from '../services/queueService.js';
 import logger from '../utils/logger.js';
 import { processQueue } from '../routes/download.js';
 
@@ -53,6 +53,7 @@ export async function download(url, format, info) {
         logger.info(`Download complete: ${info.title}`);
         sendProgress({ percent: 100, title: info.title, done: true });
         removeQueueId(info.id);
+        saveQueue();
         isDownloading = false;
         await processQueue();
     });
