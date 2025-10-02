@@ -1,42 +1,23 @@
 # yt-dl-node
 
 ## Overview
-yt-dl-node is a Node.js application that allows users to download videos from various platforms using a simple web interface. The application utilizes the `youtube-dl-exec` library to handle video downloads and provides real-time progress updates through Server-Sent Events (SSE).
+yt-dl-node is a Node.js application that allows you to download videos from various platforms (supported by `yt-dlp.exe` but this tool aims for YouTube itself) using a simple web interface. The application utilizes the `youtube-dl-exec` library to handle video downloads and provides real-time progress updates through Server-Sent Events (SSE).
 
 ## Features
-- Download videos from supported platforms.
+- Download videos from supported platforms and save it to local, predefined download directory.
+- Downloads are saved to folders named after the channel
 - Manage a download queue.
 - Real-time progress updates for ongoing downloads.
 - Simple and intuitive web interface.
 
-## Project Structure
-```
-yt-dl-node
-├── src
-│   ├── app.js                   # Entry point of the application
-│   ├── routes                   # Contains route definitions
-│   │   ├── index.js             # Main application routes
-│   │   └── download.js          # Routes related to downloading
-│   ├── services                 # Contains business logic
-│   │   ├── downloadService.js   # Functions for downloading videos
-│   │   └── queueService.js      # Functions for managing the download queue
-│   ├── utils                    # Utility functions
-│   │   ├── notifications.js     # Notifications for users
-│   │   ├── logger.js            # winston logger 
-│   │   └── validateEnv.js       # Validates environment variables
-│   └── views                    # View templates
-│       └── index.ejs            # Main view template
-├── public                       # Static files (CSS, JS, etc.)
-├── .env                         # Environment variables
-├── .queue                       # Stores download queue data
-├── package.json                 # npm configuration file
-└── package-lock.json            # Locks dependency versions
-```
+## Preview
+
+![Preview Screenshot of the tool](/main.png)
 
 ## Installation
 1. Clone the repository:
    ```
-   git clone <repository-url>
+   git clone https://github.com/Th3C0D3R/yt-dl-node
    cd yt-dl-node
    ```
 
@@ -49,6 +30,7 @@ yt-dl-node
    ```
    OUTPUT_DIRECTORY=<your_output_directory>
    FFMPEG_DIRECTORY=<path_to_ffmpeg>
+   COOKIES_FILE=<path_to_cookies_file>
    PORT=<port_number>
    ```
 
@@ -61,6 +43,19 @@ yt-dl-node
 2. Open your web browser and navigate to `http://localhost:<port_number>`.
 
 3. Use the interface to enter video URLs and manage downloads.
+
+## FFMPG
+
+Put `ffmpeg.exe` and `ffprobe.exe` in the same directory (example `C:\\bin\\`)
+Put the directory path into the `.env` at `FFMPEG_DIRECTORY`
+
+## Cookies-File
+
+To get a valid cookies.txt file (recommended for the tool to work with full speed):
+- use this extension from chrome: [Get cookies.txt LOCALLY](https://chromewebstore.google.com/detail/get-cookiestxt-locally/cclelndahbckbenkjhflpdbgdldlbecc)
+- save/export the cookies from youtube to a accessible directory
+- put the cookies.txt filepath into the `.env` at `COOKIES_FILE`
+
 
 ## Contributing
 Contributions are welcome! Please open an issue or submit a pull request for any improvements or bug fixes.
