@@ -111,8 +111,8 @@ async function download(url, format, info) {
     const channel = info.uploader || 'Unknown_Channel';
     const title = info.title || 'Unknown_Title';
     console.log(`Starting download: ${title} from ${channel}`);
-    const outputDir = path.join(DOWNLOAD_DIR, channel);
-
+    var outputDir = path.join(DOWNLOAD_DIR, channel);
+    outputDir = outputDir.replaceAll(":"," ").replaceAll("\\"," ").replaceAll("*"," ").replaceAll("'"," ").replaceAll(">"," ").replaceAll("/"," ").replaceAll("?"," ").replaceAll("!"," ").replaceAll("\""," ").replaceAll("<"," ");
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
 
     const options = {
