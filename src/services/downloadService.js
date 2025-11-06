@@ -23,7 +23,8 @@ export async function download(url, format, info) {
     const channel = info?.uploader || 'Unknown_Channel';
     const title = info?.title || 'Unknown_Title';
     logger.info(`Starting download: ${title} from ${channel}`);
-    const outputDir = path.join(DOWNLOAD_DIR, channel);
+    var dir = channel.replaceAll(":"," ").replaceAll("\\"," ").replaceAll("*"," ").replaceAll("'"," ").replaceAll(">"," ").replaceAll("/"," ").replaceAll("?"," ").replaceAll("!"," ").replaceAll("\""," ").replaceAll("<"," ");
+    const outputDir = path.join(DOWNLOAD_DIR, dir);
 
     if (!fs.existsSync(outputDir)) fs.mkdirSync(outputDir, { recursive: true });
     const options = {
