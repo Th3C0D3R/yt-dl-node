@@ -32,7 +32,9 @@ export async function download(url, format, info) {
         output: path.join(outputDir, '%(title)s.%(ext)s'),
         ffmpegLocation: FFMPEG_DIR,
         progress: true,
-        cookies: COOKIES_FILE
+        cookies: COOKIES_FILE,
+        jsRuntimes: "node"
+        
     };
     sendProgress({ percent: 0, title: `Starting download: ${title} from ${channel}`, done: false });
     ytdlProcess = youtubedl.exec(url, options);
