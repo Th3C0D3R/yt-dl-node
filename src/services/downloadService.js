@@ -33,7 +33,7 @@ export async function download(url, format, info) {
         ffmpegLocation: FFMPEG_DIR,
         progress: true,
         cookies: COOKIES_FILE,
-        jsRuntimes: "node"
+        jsRuntimes: "deno"
         
     };
     sendProgress({ percent: 0, title: `Starting download: ${title} from ${channel}`, done: false });
